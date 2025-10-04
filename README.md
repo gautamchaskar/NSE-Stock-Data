@@ -1,8 +1,29 @@
-# NSE Stock Data Analysis
+<div align="center">
+  <h1>NSE Stock Data Analysis 📈</h1>
+  <p>
+    A Python-based tool to fetch, analyze, and screen National Stock Exchange (NSE) data for seasonal trading insights.
+  </p>
 
-This project contains a series of Python scripts to fetch, analyze, and generate insights from National Stock Exchange (NSE) data.
+  [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-nc/4.0/)
+  [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+  [![Built with Streamlit](https://img.shields.io/badge/built%20with-Streamlit-ff69b4.svg)](https://www.streamlit.io/)
 
-## Prerequisites
+</div>
+
+---
+
+## 📚 Table of Contents
+- [🚀 Prerequisites](#-prerequisites)
+- [🛠️ Installation](#️-installation)
+- [⚙️ Project Pipeline (L1-L2-L3)](#️-project-pipeline-l1-l2-l3)
+- [▶️ How to Run the Pipeline](#️-how-to-run-the-pipeline)
+- [🧠 Analysis Deep Dive](#-analysis-deep-dive)
+- [🤝 Contributing](#-contributing)
+- [📜 License](#-license)
+
+---
+
+## 🚀 Prerequisites
 
 Before you begin, you need to ensure your system has the necessary tools. These steps will guide you through checking for and installing them for both macOS and Windows.
 
@@ -99,7 +120,7 @@ This project is built with Python and requires it to run.
 
 </details>
 
-## Installation
+## 🛠️ Installation
 
 Once the prerequisites are met, you can install the project itself.
 
@@ -121,7 +142,7 @@ Once the prerequisites are met, you can install the project itself.
         pip install -r requirements.txt
         ```
 
-## Project Pipeline (L1-L2-L3)
+## ⚙️ Project Pipeline (L1-L2-L3)
 
 This project is structured as a three-level data pipeline. Each level has a dedicated script and data folder, making the workflow clear and modular.
 
@@ -131,9 +152,11 @@ This project is structured as a three-level data pipeline. Each level has a dedi
 | **L2** | `L2_run_seasonal_analysis.py` | `L1_historical_stock_data/` | `L2_seasonal_analysis_reports/` | Runs an exhaustive seasonal analysis on each stock. |
 | **L3** | `L3_generate_insights.py` | `L2_seasonal_analysis_reports/` | `L3_actionable_insights/` | Filters and ranks the L2 data to find actionable insights. |
 
-## How to Run the Pipeline
+## ▶️ How to Run the Pipeline
 
 Run the scripts in order from your terminal.
+
+> **Note:** The L2 analysis is the most computationally intensive step and may take a significant amount of time to complete for all stocks.
 
 ### Step 1: Fetch Raw Data (L1)
 ```bash
@@ -141,7 +164,6 @@ python L1_fetch_historical_data.py
 ```
 
 ### Step 2: Run Seasonal Analysis (L2)
-This is the most computationally intensive step.
 ```bash
 python -u L2_run_seasonal_analysis.py
 ```
@@ -151,70 +173,46 @@ python -u L2_run_seasonal_analysis.py
 python L3_generate_insights.py
 ```
 
-## Level 2: The Calculation: A Conceptual Overview
+## 🧠 Analysis Deep Dive
 
-To find the best seasonal periods, the tool performs an exhaustive, three-level analysis.
+This section provides a conceptual overview of the logic used in the L2 and L3 scripts.
 
-### Testing Every Possible Time Window
-First, the system decides on a length of time to test, called a "time window." It starts with a window of 1 day, then 2 days, and so on, all the way up to 365 days.
+### Level 2: The Calculation
 
-### Testing Every Starting Point
-For each time window, the system then tests every possible starting point within a year. For example, for a 30-day window, it first tests the period from Jan 1st to Jan 30th, then Jan 2nd to Jan 31st, and so on.
+To find the best seasonal periods, the tool performs an exhaustive, three-level analysis by testing every possible time window (from 1 to 365 days) at every possible starting point within the year.
 
-> **The "Slot":** The combination of a **Time Window** (e.g., 30 days) and a **Starting Point** (e.g., March 1st) creates a specific "slot" that needs to be evaluated.
+#### Evaluating a "Slot"
+A "slot" is the combination of a time window (e.g., 30 days) and a starting point (e.g., March 1st). Each slot is evaluated by looking at its historical performance across all available years.
 
-### Evaluating a Slot's Historical Performance
-To evaluate a single slot, the system looks back through the stock's entire history and analyzes how it performed during that specific period, year after year.
+1.  **Gathering Yearly Returns:** It finds the return for that slot for every single year in the dataset.
+2.  **Finding the "Typical" Return (Median):** It calculates the **median return** from the list of yearly returns to get a realistic picture of the slot's typical performance.
+3.  **Measuring Consistency:** It calculates the percentage of years where the return was **greater than 0%**.
 
-1.  **Gathering Yearly Returns:** It finds the return for that slot for every single year in the dataset. This results in a list of yearly returns for that slot.
+The final output for each slot includes metrics like `median_return`, `consistency`, `min_return`, `max_return`, `Standard_Dev`, and `total_years`. This entire list of over 130,000 evaluated slots is saved to a CSV file for each stock in the `L2_seasonal_analysis_reports/` folder.
 
-2.  **Finding the "Typical" Return (Median):** From that list of yearly returns, it calculates the **median return**. The median is the "middle" value, which gives a realistic picture of the slot's typical performance.
+### Level 3: Actionable Insights Strategy
 
-3.  **Measuring Consistency (Positive Years):** It then calculates the percentage of years where the return was **greater than 0%**. This is the traditional measure of consistency.
+The L3 script filters the 130,000+ slots from the L2 analysis to find the single "best" opportunity for each stock using a two-stage process.
 
-### Finalizing the Slot's Data
-At this point, the analysis for one single slot is complete. The system has now calculated all the necessary metrics for it:
-
-- **`median_return`**: The typical historical return (the median).
-- **`consistency`**: The percentage of years that performed with a positive return.
-- **`min_return`**: The single worst return the slot has ever had. This is a key measure of historical risk.
-- **`max_return`**: The single best return the slot has ever had.
-- **`Standard_Dev`**: The standard deviation of returns, which measures the slot's volatility.
-- **`total_years`**: The number of years of data used for the analysis.
-
-This process is then repeated for every single `start_day` within a given `window_size`, and then for every `window_size`.
-
-### Final L2 Output
-After the entire analysis is complete, the system will have a complete list of **all** evaluated slots (over 130,000 of them). This entire list is saved to a CSV file for the stock in the `L2_seasonal_analysis_reports/` folder.
-
-## Level 3: Actionable Insights Strategy
-
-The L3 script filters the 130,000+ slots from the L2 analysis to find the single "best" opportunity for each stock, based on a two-stage process.
-
-### Stage 1: Minimum Quality Filter
-
+#### Stage 1: Minimum Quality Filter
 A slot must meet all of the following strict criteria to be considered:
+- **Consistency:** `> 80%`
+- **Data History:** `>= 2 years`
+- **Minimum Return:** `>= +15%` (The worst performance was still a 15% gain)
+- **Slot Time:** `3 to 15 days`
 
-1.  **Consistency:** `> 80%`
-2.  **Data History:** `>= 2 years`
-3.  **Minimum Return:** `>= +15%` (The worst performance was still a 15% gain)
-4.  **Slot Time:** `3 to 15 days`
-
-### Stage 2: The Quality Score
-
+#### Stage 2: The Quality Score
 Any slot that passes the filter is then ranked using a weighted **Quality Score** to balance safety, return, and risk:
 
-**`Quality Score = (Consistency * 50%) + (Median Return * 30%) + (Risk-Adjusted Return * 20%)`**
+`Quality Score = (Consistency * 50%) + (Median Return * 30%) + (Risk-Adjusted Return * 20%)`
 
-- **Risk-Adjusted Return** is calculated as `Median Return / Standard Deviation`.
+Where `Risk-Adjusted Return` is calculated as `Median Return / Standard Deviation`. The opportunity with the highest final Quality Score for each stock is saved to `L3_actionable_insights/actionable_insights.csv`.
 
-For each stock, the opportunity with the highest final Quality Score is selected and saved to `L3_actionable_insights/actionable_insights.csv`.
-
-## Contributing
+## 🤝 Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-## License
+## 📜 License
 
 Copyright (c) 2025 Gautam Chaskar
 
