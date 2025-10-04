@@ -46,42 +46,52 @@ def get_all_nse_symbols():
 def fetch_and_save_stock_data(symbol):
     """Downloads historical data and saves it to a 'SYMBOL - NAME.csv' file."""
     ticker = f"{symbol}.NS"
-
+    start_date = None
+    
     try:
         time.sleep(random.uniform(0.5, 1.5))
-        stock = yf.Ticker(ticker)
         
-        # --- Get company name for the filename ---
-        try:
-            # --- Check for existing file ---
-            existing_files = glob.glob(os.path.join(OUTPUT_DIR, f"{symbol} - *.csv"))
-            if existing_files:
-                file_path = existing_files[0]
-            else:
-                company_name = stock.info.get('longName', symbol)
-                # Sanitize the name for the filename
-                sanitized_name = "".join(c for c in company_name if c.isalnum() or c in (' ', '.')).rstrip()
-                file_path = os.path.join(OUTPUT_DIR, f"{symbol} - {sanitized_name}.csv")
-        except Exception:
-            sanitized_name = symbol
+        # --- Determine file_path and start_date ---
+        existing_files = glob.glob(os.path.join(OUTPUT_DIR, f"{symbol} - *.csv"))
+        if existing_files:
+            file_path = existing_files[0]
+            try:
+                df_existing = pd.read_csv(file_path)
+                df_existing['DATE'] = pd.to_datetime(df_existing['DATE'])
+                last_date = df_existing['DATE'].max().date()
+                start_date = last_date + timedelta(days=1)
+            except (pd.errors.EmptyDataError, FileNotFoundError):
+                # File is empty or not found, treat as new download
+                pass
+        else:
+            stock = yf.Ticker(ticker)
+            company_name = stock.info.get('longName', symbol)
+            sanitized_name = "".join(c for c in company_name if c.isalnum() or c in (' ', '.')).rstrip()
             file_path = os.path.join(OUTPUT_DIR, f"{symbol} - {sanitized_name}.csv")
         # --- END ---
 
-        df_new = stock.history(period="max", auto_adjust=False)
+        stock = yf.Ticker(ticker)
+        if start_date:
+            df_new = stock.history(start=start_date, auto_adjust=False)
+        else:
+            df_new = stock.history(period="max", auto_adjust=False)
 
         if df_new.empty:
-            return f"{symbol}: No data found on Yahoo Finance."
+            return f"{symbol}: No new data found."
 
         df_new.reset_index(inplace=True)
         df_new.rename(columns={'Date': 'DATE', 'Open': 'OPEN', 'High': 'HIGH', 'Low': 'LOW', 'Close': 'CLOSE', 'Volume': 'VOLUME'}, inplace=True)
         
-        # We don't need the name column anymore
         df_new = df_new[['DATE', 'OPEN', 'HIGH', 'LOW', 'CLOSE', 'VOLUME']]
         df_new['DATE'] = pd.to_datetime(df_new['DATE']).dt.date
 
-        df_new.to_csv(file_path, index=False)
-
-        return f"{symbol}: Success. Saved to {file_path}"
+        # Append to existing file or write new file
+        if start_date:
+            df_new.to_csv(file_path, mode='a', header=False, index=False)
+            return f"{symbol}: Success. Appended new data to {file_path}"
+        else:
+            df_new.to_csv(file_path, index=False)
+            return f"{symbol}: Success. Saved to {file_path}"
 
     except Exception as e:
         return f"{symbol}: Error - {e}"
