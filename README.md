@@ -4,11 +4,14 @@ This project contains a series of Python scripts to fetch, analyze, and generate
 
 ## Prerequisites
 
-Before you begin, you need to ensure your system has the necessary tools. These steps will guide you through checking for and installing them.
+Before you begin, you need to ensure your system has the necessary tools. These steps will guide you through checking for and installing them for both macOS and Windows.
 
-### Step 1: Install a Package Manager (Homebrew for macOS)
+### Step 1: Install a Package Manager
 
-A package manager automates the process of installing, updating, and removing software. For macOS, the most popular one is Homebrew.
+A package manager automates the process of installing, updating, and removing software.
+
+<details>
+<summary><strong>macOS (Homebrew)</strong></summary>
 
 *   **To check if you have Homebrew installed**, open your terminal and run:
     ```bash
@@ -20,9 +23,26 @@ A package manager automates the process of installing, updating, and removing so
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     ```
 
+</details>
+
+<details>
+<summary><strong>Windows (Winget)</strong></summary>
+
+*   **To check if you have Winget installed**, open PowerShell and run:
+    ```powershell
+    winget --version
+    ```
+*   **If it's installed**, you will see a version number (e.g., `v1.3.2091`). You can proceed to the next step.
+*   **If you get an error**, Winget is included by default in modern versions of Windows. You can install or update it from the Microsoft Store by searching for **"App Installer"**.
+
+</details>
+
 ### Step 2: Install Python
 
 This project is built with Python and requires it to run.
+
+<details>
+<summary><strong>macOS</strong></summary>
 
 *   **To check if you have Python installed**, run:
     ```bash
@@ -34,19 +54,50 @@ This project is built with Python and requires it to run.
     brew install python
     ```
 
+</details>
+
+<details>
+<summary><strong>Windows</strong></summary>
+
+*   **To check if you have Python installed**, open PowerShell and run:
+    ```powershell
+    python --version
+    ```
+*   **If it's installed**, you will see a version number (e.g., `Python 3.9.7`).
+*   **If you get an error**, you can install Python using Winget:
+    ```powershell
+    winget install Python.Python.3
+    ```
+
+</details>
+
 ### Step 3: Check for pip (Python Package Installer)
 
-`pip` is Python's own package manager, used to install the libraries from `requirements.txt`. It typically comes with Python.
+`pip` is Python's own package manager, used to install the project's dependencies. It typically comes included with Python.
+
+<details>
+<summary><strong>macOS</strong></summary>
 
 *   **To check if you have pip installed**, run:
     ```bash
     pip3 --version
     ```
 *   **If it's installed**, you will see output like `pip 21.3.1 from ...`.
-*   **If you get an error**, it's likely your Python installation is incomplete. Try reinstalling Python using the command from Step 2. You can also try to ensure pip is available with this command:
-    ```bash
-    python3 -m ensurepip --upgrade
+*   **If you get an error**, it's likely your Python installation is incomplete. Try reinstalling Python (Step 2) or run `python3 -m ensurepip --upgrade`.
+
+</details>
+
+<details>
+<summary><strong>Windows</strong></summary>
+
+*   **To check if you have pip installed**, run:
+    ```powershell
+    pip --version
     ```
+*   **If it's installed**, you will see output like `pip 21.3.1 from ...`.
+*   **If you get an error**, it's likely your Python installation is incomplete. Try reinstalling Python (Step 2) or run `python -m ensurepip --upgrade`.
+
+</details>
 
 ## Installation
 
@@ -61,9 +112,14 @@ Once the prerequisites are met, you can install the project itself.
     cd NSE-Stock-Data
     ```
 3.  **Install the required Python libraries:**
-    ```bash
-    pip3 install -r requirements.txt
-    ```
+    *   On **macOS**, run:
+        ```bash
+        pip3 install -r requirements.txt
+        ```
+    *   On **Windows**, run:
+        ```powershell
+        pip install -r requirements.txt
+        ```
 
 ## Project Pipeline (L1-L2-L3)
 
