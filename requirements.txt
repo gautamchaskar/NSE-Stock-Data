@@ -1,0 +1,11 @@
+yfinance
+pandas
+nsetools
+tqdm
+numpy
+streamlit
+plotly
+seaborn
+matplotlib
+openchart
+psutil
