@@ -46,6 +46,7 @@ def get_all_nse_symbols():
 def fetch_and_save_stock_data(symbol):
     """Downloads historical data and saves it to a 'SYMBOL - NAME.csv' file."""
     ticker = f"{symbol}.NS"
+    file_path = None
     start_date = None
     
     try:
@@ -63,18 +64,25 @@ def fetch_and_save_stock_data(symbol):
             except (pd.errors.EmptyDataError, FileNotFoundError):
                 # File is empty or not found, treat as new download
                 pass
-        else:
-            stock = yf.Ticker(ticker)
-            company_name = stock.info.get('longName', symbol)
+        
+        # If file_path is still None, it means no existing file was found or an error occurred reading it
+        if file_path is None:
+            stock_info = yf.Ticker(ticker).info # Get stock info to determine company name for new file
+            company_name = stock_info.get('longName', symbol)
             sanitized_name = "".join(c for c in company_name if c.isalnum() or c in (' ', '.')).rstrip()
             file_path = os.path.join(OUTPUT_DIR, f"{symbol} - {sanitized_name}.csv")
-        # --- END ---
 
-        stock = yf.Ticker(ticker)
-        if start_date:
+        df_new = pd.DataFrame() # Initialize empty DataFrame
+        
+        # Fetch data only if start_date is set (incremental) or if it's a new file (full download)
+        if start_date: # Existing file, fetch incremental data
+            stock = yf.Ticker(ticker)
             df_new = stock.history(start=start_date, auto_adjust=False)
-        else:
+        elif not existing_files: # New file, fetch full history
+            stock = yf.Ticker(ticker)
             df_new = stock.history(period="max", auto_adjust=False)
+        else: # Existing file, but no new data to fetch (start_date is None or in future)
+            return f"{symbol}: No new data found."
 
         if df_new.empty:
             return f"{symbol}: No new data found."
@@ -86,10 +94,10 @@ def fetch_and_save_stock_data(symbol):
         df_new['DATE'] = pd.to_datetime(df_new['DATE']).dt.date
 
         # Append to existing file or write new file
-        if start_date:
+        if existing_files and start_date: # Append if existing and new data was fetched
             df_new.to_csv(file_path, mode='a', header=False, index=False)
             return f"{symbol}: Success. Appended new data to {file_path}"
-        else:
+        else: # Write new file (either truly new or overwriting empty/corrupt existing)
             df_new.to_csv(file_path, index=False)
             return f"{symbol}: Success. Saved to {file_path}"
 
