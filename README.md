@@ -2,17 +2,68 @@
 
 This project contains a series of Python scripts to fetch, analyze, and generate insights from National Stock Exchange (NSE) data.
 
+## Prerequisites
+
+Before you begin, you need to ensure your system has the necessary tools. These steps will guide you through checking for and installing them.
+
+### Step 1: Install a Package Manager (Homebrew for macOS)
+
+A package manager automates the process of installing, updating, and removing software. For macOS, the most popular one is Homebrew.
+
+*   **To check if you have Homebrew installed**, open your terminal and run:
+    ```bash
+    brew --version
+    ```
+*   **If it's installed**, you will see a version number (e.g., `Homebrew 3.6.12`). You can proceed to the next step.
+*   **If you get an error** like `command not found: brew`, you need to install it. Run the following command in your terminal:
+    ```bash
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    ```
+
+### Step 2: Install Python
+
+This project is built with Python and requires it to run.
+
+*   **To check if you have Python installed**, run:
+    ```bash
+    python3 --version
+    ```
+*   **If it's installed**, you will see a version number (e.g., `Python 3.9.7`).
+*   **If you get an error**, you can install Python using Homebrew:
+    ```bash
+    brew install python
+    ```
+
+### Step 3: Check for pip (Python Package Installer)
+
+`pip` is Python's own package manager, used to install the libraries from `requirements.txt`. It typically comes with Python.
+
+*   **To check if you have pip installed**, run:
+    ```bash
+    pip3 --version
+    ```
+*   **If it's installed**, you will see output like `pip 21.3.1 from ...`.
+*   **If you get an error**, it's likely your Python installation is incomplete. Try reinstalling Python using the command from Step 2. You can also try to ensure pip is available with this command:
+    ```bash
+    python3 -m ensurepip --upgrade
+    ```
+
 ## Installation
 
-1.  Clone the repository:
+Once the prerequisites are met, you can install the project itself.
+
+1.  **Clone the repository:**
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/gautamchaskar/NSE-Stock-Data
     ```
-2.  Install the required dependencies:
+2.  **Navigate into the project directory:**
     ```bash
-    pip install -r requirements.txt
+    cd NSE-Stock-Data
     ```
-    *(Note: A `requirements.txt` file does not currently exist. You may need to create one based on the imports in the Python scripts.)*
+3.  **Install the required Python libraries:**
+    ```bash
+    pip3 install -r requirements.txt
+    ```
 
 ## Project Pipeline (L1-L2-L3)
 
