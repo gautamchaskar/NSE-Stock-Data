@@ -49,7 +49,7 @@ def fetch_and_save_stock_data(symbol):
     start_date = None
     
     try:
-        time.sleep(random.uniform(0.5, 1.5))
+        time.sleep(random.uniform(1, 3))
         
         # --- Determine file_path and start_date ---
         existing_files = glob.glob(os.path.join(OUTPUT_DIR, f"{symbol} - *.csv"))
@@ -117,7 +117,7 @@ def main():
 
         print(f"\nStarting download for {len(symbols)} stocks using yfinance...")
         # Use multiprocessing pool for parallel execution
-        with Pool(processes=cpu_count()) as pool:
+        with Pool(processes=4) as pool:
             results = list(tqdm(pool.imap_unordered(fetch_and_save_stock_data, symbols), total=len(symbols)))
 
         print("\n--- Download Complete ---")

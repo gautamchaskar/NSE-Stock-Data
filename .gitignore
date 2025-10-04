@@ -1,0 +1,6 @@
+# IDE and OS files
+.vscode/
+.DS_Store
+
+# Data files
+L1_historical_stock_data/
