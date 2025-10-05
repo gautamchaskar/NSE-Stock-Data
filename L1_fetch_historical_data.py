@@ -50,8 +50,6 @@ def fetch_and_save_stock_data(symbol):
     start_date = None
     
     try:
-        time.sleep(random.uniform(1, 3))
-        
         # --- Determine file_path and start_date ---
         existing_files = glob.glob(os.path.join(OUTPUT_DIR, f"{symbol} - *.csv"))
         if existing_files:
@@ -67,6 +65,7 @@ def fetch_and_save_stock_data(symbol):
         
         # If file_path is still None, it means no existing file was found or an error occurred reading it
         if file_path is None:
+            time.sleep(random.uniform(1, 3)) # Apply sleep only when making a network call
             stock_info = yf.Ticker(ticker).info # Get stock info to determine company name for new file
             company_name = stock_info.get('longName', symbol)
             sanitized_name = "".join(c for c in company_name if c.isalnum() or c in (' ', '.')).rstrip()
@@ -76,9 +75,11 @@ def fetch_and_save_stock_data(symbol):
         
         # Fetch data only if start_date is set (incremental) or if it's a new file (full download)
         if start_date: # Existing file, fetch incremental data
+            time.sleep(random.uniform(1, 3)) # Apply sleep only when making a network call
             stock = yf.Ticker(ticker)
             df_new = stock.history(start=start_date, auto_adjust=False)
         elif not existing_files: # New file, fetch full history
+            time.sleep(random.uniform(1, 3)) # Apply sleep only when making a network call
             stock = yf.Ticker(ticker)
             df_new = stock.history(period="max", auto_adjust=False)
         else: # Existing file, but no new data to fetch (start_date is None or in future)
